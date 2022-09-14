@@ -26,10 +26,20 @@ template <typename PassiveT, typename SolverT>
 Eigen::VectorX<PassiveT> newton_direction(
         const Eigen::VectorX<PassiveT>& _g,
         const Eigen::SparseMatrix<PassiveT>& _H_proj,
-        LinearSolver<PassiveT, SolverT>& _solver,
-        const PassiveT& _w_identity = 0.0)
+        LinearSolver<PassiveT, SolverT>& _solver)
 {
-    const Eigen::SparseMatrix<PassiveT> H_reg = _w_identity * identity<PassiveT>(_g.size()) + _H_proj;
+    double w_identity = 0;
+    return newton_direction(_g, _H_proj, _solver, w_identity);
+}
+
+template <typename PassiveT, typename SolverT>
+Eigen::VectorX<PassiveT> newton_direction(
+        const Eigen::VectorX<PassiveT>& _g,
+        const Eigen::SparseMatrix<PassiveT>& _H_proj,
+        LinearSolver<PassiveT, SolverT>& _solver,
+        PassiveT& _w_identity)
+{
+    Eigen::SparseMatrix<PassiveT> H_reg = _w_identity * identity<PassiveT>(_g.size()) + _H_proj;
 
     if (_solver.sparsity_pattern_dirty)
     {
@@ -38,11 +48,24 @@ Eigen::VectorX<PassiveT> newton_direction(
     }
 
     _solver.solver.factorize(H_reg);
+
+    if(_solver.solver.info() == Eigen::Success)
+    {
+        _w_identity /= 2.0;
+    }
+
+    while(_solver.solver.info() != Eigen::Success)
+    {
+        _w_identity *= 2.0;
+        for(int j = 0; j < H_reg.cols(); ++j)
+        {
+            H_reg.coeffRef(j, j) += _w_identity;
+        }
+
+        _solver.solver.factorize(H_reg);
+    }
+
     const Eigen::VectorX<PassiveT> d = _solver.solver.solve(-_g);
-
-    if (_solver.solver.info() != Eigen::Success)
-        TINYAD_ERROR_throw("Linear solve failed.");
-
     TINYAD_ASSERT_FINITE_MAT(d);
     return d;
 }
