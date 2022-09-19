@@ -39,7 +39,11 @@ Eigen::VectorX<PassiveT> newton_direction(
         LinearSolver<PassiveT, SolverT>& _solver,
         PassiveT& _w_identity)
 {
-    Eigen::SparseMatrix<PassiveT> H_reg = _w_identity * identity<PassiveT>(_g.size()) + _H_proj;
+    Eigen::SparseMatrix<PassiveT> H_reg = _H_proj;
+    for(int j = 0; j < H_reg.cols(); ++j)
+    {
+        H_reg.coeffRef(j, j) += _w_identity;
+    }
 
     if (_solver.sparsity_pattern_dirty)
     {
@@ -50,9 +54,7 @@ Eigen::VectorX<PassiveT> newton_direction(
     _solver.solver.factorize(H_reg);
 
     if(_solver.solver.info() == Eigen::Success)
-    {
         _w_identity /= 2.0;
-    }
 
     while(_solver.solver.info() != Eigen::Success)
     {
@@ -61,7 +63,6 @@ Eigen::VectorX<PassiveT> newton_direction(
         {
             H_reg.coeffRef(j, j) += _w_identity;
         }
-
         _solver.solver.factorize(H_reg);
     }
 

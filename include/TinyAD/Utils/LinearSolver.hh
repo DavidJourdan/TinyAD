@@ -11,7 +11,7 @@ namespace TinyAD
 
 template <
         typename PassiveT = double,
-        typename SolverT = Eigen::SimplicialLDLT<Eigen::SparseMatrix<PassiveT>>>
+        typename SolverT = Eigen::SimplicialLLT<Eigen::SparseMatrix<PassiveT>>>
 struct LinearSolver
 {
     SolverT solver;
