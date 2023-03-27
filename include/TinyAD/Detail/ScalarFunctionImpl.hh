@@ -253,6 +253,22 @@ eval_hessian(
 template <int variable_dimension, typename PassiveT, typename VariableHandleT>
 Eigen::SparseMatrix<PassiveT>
 ScalarFunction<variable_dimension, PassiveT, VariableHandleT>::
+eval_hessian_proj(
+        const Eigen::VectorX<PassiveT>& _x) const
+{
+    TINYAD_ASSERT_EQ(_x.size(), n_vars);
+
+    PassiveT f = 0.0;
+    Eigen::VectorX<PassiveT> g;
+    Eigen::SparseMatrix<PassiveT> H;
+    eval_with_hessian_proj(_x, f, g, H);
+
+    return H;
+}
+
+template <int variable_dimension, typename PassiveT, typename VariableHandleT>
+Eigen::SparseMatrix<PassiveT>
+ScalarFunction<variable_dimension, PassiveT, VariableHandleT>::
 eval_hessian_of_quadratic() const
 {
     return eval_hessian(Eigen::VectorXd::Zero(n_vars));

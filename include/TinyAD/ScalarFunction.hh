@@ -147,6 +147,12 @@ struct ScalarFunction
             const Eigen::VectorX<PassiveT>& _x) const;
 
     /**
+     * Evaluate Hessian matrix only.
+     */
+    Eigen::SparseMatrix<PassiveT> eval_hessian_proj(
+            const Eigen::VectorX<PassiveT>& _x) const;
+
+    /**
      * Evaluate Hessian assuming function is quadratic, i.e. Hessian is independent of x.
      * Warning: It is not checked if the function is actually quadratic.
      */
