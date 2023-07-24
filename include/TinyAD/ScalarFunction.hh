@@ -141,6 +141,13 @@ struct ScalarFunction
             const Eigen::VectorX<PassiveT>& _x) const;
 
     /**
+     * Evaluate gradient only.
+     */
+    Eigen::VectorX<PassiveT>
+    eval_gradient(
+            const Eigen::VectorX<PassiveT>& _x) const;
+
+    /**
      * Evaluate Hessian matrix only.
      */
     Eigen::SparseMatrix<PassiveT> eval_hessian(

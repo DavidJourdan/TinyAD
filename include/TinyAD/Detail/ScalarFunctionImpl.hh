@@ -235,6 +235,21 @@ eval_with_derivatives(
 }
 
 template <int variable_dimension, typename PassiveT, typename VariableHandleT>
+Eigen::VectorX<PassiveT>
+ScalarFunction<variable_dimension, PassiveT, VariableHandleT>::
+eval_gradient(
+        const Eigen::VectorX<PassiveT>& _x) const
+{
+    TINYAD_ASSERT_EQ(_x.size(), n_vars);
+
+    PassiveT f = 0.0;
+    Eigen::VectorX<PassiveT> g;
+    eval_with_gradient(_x, f, g);
+
+    return g;
+}
+
+template <int variable_dimension, typename PassiveT, typename VariableHandleT>
 Eigen::SparseMatrix<PassiveT>
 ScalarFunction<variable_dimension, PassiveT, VariableHandleT>::
 eval_hessian(

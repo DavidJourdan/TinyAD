@@ -24,7 +24,7 @@ bool armijo_condition(
 }
 
 template <typename PassiveT, int d, typename EvalFunctionT>
-Eigen::Vector<PassiveT, d> line_search(
+PassiveT line_search(
         const Eigen::Vector<PassiveT, d>& _x0,
         const Eigen::Vector<PassiveT, d>& _d,
         const PassiveT _f,
@@ -51,7 +51,7 @@ Eigen::Vector<PassiveT, d> line_search(
         const PassiveT f_new = _eval(x_new);
         TINYAD_ASSERT_EQ(f_new, f_new);
         if (armijo_condition(_f, f_new, s, _d, _g, _armijo_const))
-            return x_new;
+            return s;
 
         if (try_one && s > 1.0 && s * _shrink < 1.0)
             s = 1.0;
@@ -61,7 +61,7 @@ Eigen::Vector<PassiveT, d> line_search(
 
     TINYAD_WARNING("Line search couldn't find improvement. Gradient max norm is " << _g.cwiseAbs().maxCoeff());
 
-    return _x0;
+    return -1;
 }
 
 }
