@@ -19,7 +19,7 @@ struct Timer
         name(_name),
         silent(_silent),
         running(true),
-        start(Clock::now()),
+        start_point(Clock::now()),
         duration(0.0)
     { }
 
@@ -27,11 +27,18 @@ struct Timer
     {
         if (!silent)
         {
+            stop();
             TINYAD_INFO(TINYAD_ANSI_FG_WHITE
                         << "[TIMER] " << name << " took "
                         << seconds()
                         << "s.");
         }
+    }
+
+    void start()
+    {
+        running = true;
+        start_point = Clock::now();
     }
 
     void stop()
@@ -45,9 +52,9 @@ struct Timer
     double seconds()
     {
         if (running)
-            update_duration();
-
-        return duration.count();
+            return (duration + Clock::now() - start_point).count();
+        else
+            return duration.count();
     }
 
 private:
@@ -55,14 +62,14 @@ private:
     void update_duration()
     {
         std::atomic_thread_fence(std::memory_order_relaxed);
-        duration = Clock::now() - start;
+        duration += Clock::now() - start_point;
         std::atomic_thread_fence(std::memory_order_relaxed);
     }
 
     const std::string name;
     const bool silent;
     bool running;
-    const typename Clock::time_point start;
+    typename Clock::time_point start_point;
     std::chrono::duration<double> duration;
 };
 
